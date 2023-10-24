@@ -3,5 +3,4 @@ from django.db import models
 
 
 class CustomUser(AbstractUser):
-    pass
-    # bio = models.TextField('Биография', blank=True)
+    confirmation_code = models.TextField('Код подтверждения', blank=True)

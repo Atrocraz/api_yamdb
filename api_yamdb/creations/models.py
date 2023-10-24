@@ -80,11 +80,15 @@ class Title(models.Model):
 
 
 class TitlesGenres(models.Model):
+    """Вспомогательная модель связи жанров и произведений
+    многие-ко-многим.
+    """
+
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE
     )
     genre = models.ForeignKey(
         Genre,
-        on_delete=models.CASCADE
+        on_delete=models.SET_NULL
     )

@@ -33,6 +33,3 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all()
     permission_classes = [AllowAnyOrAdmin]
     pagination_class = LimitOffsetPagination
-
-    def perform_create(self, serializer):
-        serializer.save(author=self.request.user)

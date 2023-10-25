@@ -65,9 +65,6 @@ class TitleSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
-
-class TitlesGenres(serializers.ModelSerializer):
-
     def validate_genres(self, value):
         """
         Проверка жанров из существующего списка.
@@ -77,4 +74,14 @@ class TitlesGenres(serializers.ModelSerializer):
                 raise ValidationError(
                     ['Выберите существующий жанр из списка.']
                 )
+        return value
+
+    def validate_category(self, value):
+        """
+        Проверка категории из существующего списка.
+        """
+        if value not in Category.objects.all():
+            raise ValidationError(
+                ['Выберите существующую категорию из списка.']
+            )
         return value

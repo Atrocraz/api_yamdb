@@ -3,7 +3,8 @@ import random
 
 from django.core.mail import send_mail
 from rest_framework import status
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
@@ -12,6 +13,7 @@ from .serializers import UserSerializer
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def obtain_confirmation_code(request):
     '''API-view функция регистрации пользователя.
 
@@ -40,6 +42,7 @@ def obtain_confirmation_code(request):
 
 
 @api_view(['POST'])
+@permission_classes([AllowAny])
 def get_jwt_token(request):
     '''API-view функция отправки JWT-кода.
 

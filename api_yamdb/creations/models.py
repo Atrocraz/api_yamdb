@@ -45,7 +45,6 @@ class Title(models.Model):
 
     name = models.CharField('название', max_length=256)
     year = models.IntegerField(
-        max_digits=4,
         verbose_name='год создания',
         validators=[MaxValueValidator(CURRENT_YEAR)]
     )
@@ -55,10 +54,7 @@ class Title(models.Model):
     )
     genres = models.ManyToManyField(
         Genre,
-        related_name="title_genres",
         verbose_name='жанр',
-        verbose_name_plural='жанры',
-        null=True,
         blank=True
     )
     category = models.ForeignKey(
@@ -77,18 +73,3 @@ class Title(models.Model):
 
     def __str__(self):
         return self.title[:SHOW_SYMBOLS]
-
-
-class TitlesGenres(models.Model):
-    """Вспомогательная модель связи жанров и произведений
-    многие-ко-многим.
-    """
-
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE
-    )
-    genre = models.ForeignKey(
-        Genre,
-        on_delete=models.SET_NULL
-    )

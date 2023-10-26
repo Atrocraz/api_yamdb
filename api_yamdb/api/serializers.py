@@ -1,8 +1,7 @@
 from django.contrib.auth import get_user_model
-from django.db import models
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-from rest_framework.serializers import ValidationError
+from rest_framework.serializers import ValidationError, SlugField
 from rest_framework.validators import UniqueValidator
 
 from creations.models import Category, Genre, Title
@@ -14,7 +13,7 @@ User = get_user_model()
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор категории."""
 
-    slug = models.SlugField(
+    slug = SlugField(
         max_length=50,
         validators=[UniqueValidator(
             queryset=Category.objects.all(),
@@ -30,7 +29,7 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор жанра."""
 
-    slug = models.SlugField(
+    slug = SlugField(
         max_length=50,
         validators=[UniqueValidator(
             queryset=Genre.objects.all(),
@@ -47,16 +46,14 @@ class TitleSerializer(serializers.ModelSerializer):
     """Сериализатор произведения."""
 
     category = SlugRelatedField(
-        required=True,
-        slug_field='name',
         read_only=True,
+        slug_field='slug',
         help_text='Выберите категорию'
     )
 
     genres = SlugRelatedField(
-        required=True,
         many=True,
-        slug_field='name',
+        slug_field='slug',
         read_only=True,
         help_text='Выберите хотя бы один жанр'
     )

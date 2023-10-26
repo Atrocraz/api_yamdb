@@ -18,6 +18,7 @@ class GenreAdmin(admin.ModelAdmin):
         TitleInline,
     ]
 
+
 @admin.register(Title)
 class TitleAdmin(admin.ModelAdmin):
     """Названия произведений отображены в админ-панели.

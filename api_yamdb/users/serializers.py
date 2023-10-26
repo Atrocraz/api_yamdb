@@ -18,7 +18,9 @@ class UserSerializer(serializers.ModelSerializer):
     переменной EMAIL_MAX_LEN.
     '''
     username = serializers.RegexField(regex='^[\w.@+-]+\Z',
-                                      required=True)
+                                      required=True,
+                                      max_length=USERNAME_MAX_LEN)
+    email = serializers.CharField(max_length=EMAIL_MAX_LEN)
     confirmation_code = serializers.CharField(write_only=True)
 
     class Meta:
@@ -29,8 +31,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_username(self, value):
         'Валидатор поля username.'
-        if len(value) > USERNAME_MAX_LEN:
-            raise serializers.ValidationError()
 
         if value == 'me':
             raise serializers.ValidationError("This username is forbidden!")
@@ -38,8 +38,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def validate_email(self, value):
         'Валидатор поля email.'
-        if len(value) > EMAIL_MAX_LEN:
-            raise serializers.ValidationError()
 
         if CustomUser.objects.filter(email__exact=value).exists():
             raise serializers.ValidationError(

@@ -12,6 +12,9 @@ DEBUG = True
 ALLOWED_HOSTS = ['*']
 
 AUTH_USER_MODEL = 'users.CustomUser'
+CONFIRMATION_CODE_LENGHT = 20
+EMAIL_MAX_LEN = 254
+USERNAME_MAX_LEN = 150
 
 # Application definition
 

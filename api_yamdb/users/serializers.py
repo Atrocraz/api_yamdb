@@ -1,9 +1,8 @@
+from django.conf import settings
 from rest_framework import serializers
+from rest_framework.validators import UniqueValidator
 
 from users.models import CustomUser
-
-EMAIL_MAX_LEN = 254
-USERNAME_MAX_LEN = 150
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -19,8 +18,13 @@ class UserSerializer(serializers.ModelSerializer):
     '''
     username = serializers.RegexField(regex='^[\w.@+-]+\Z',
                                       required=True,
-                                      max_length=USERNAME_MAX_LEN)
-    email = serializers.CharField(max_length=EMAIL_MAX_LEN)
+                                      max_length=settings.USERNAME_MAX_LEN)
+    email = serializers.CharField(
+        max_length=settings.EMAIL_MAX_LEN,
+        required=True,
+        validators=[UniqueValidator(
+            queryset=CustomUser.objects.all(),
+            message='This email is already registered!'),])
     confirmation_code = serializers.CharField(write_only=True)
 
     class Meta:
@@ -34,12 +38,4 @@ class UserSerializer(serializers.ModelSerializer):
 
         if value == 'me':
             raise serializers.ValidationError("This username is forbidden!")
-        return value
-
-    def validate_email(self, value):
-        'Валидатор поля email.'
-
-        if CustomUser.objects.filter(email__exact=value).exists():
-            raise serializers.ValidationError(
-                "This email is already registered!")
         return value

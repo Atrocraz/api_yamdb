@@ -1,6 +1,7 @@
 import math
 import random
 
+from django.conf import settings
 from django.core.mail import send_mail
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
@@ -80,7 +81,7 @@ def get_confirmation_code():
     string = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ'
     OTP = ""
     length = len(string)
-    for i in range(20):
+    for i in range(settings.CONFIRMATION_CODE_LENGHT):
         OTP += string[math.floor(random.random() * length)]
 
     return OTP

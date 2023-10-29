@@ -3,14 +3,15 @@ import random
 
 from django.conf import settings
 from django.core.mail import send_mail
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.permissions import AllowAny
+from rest_framework.pagination import LimitOffsetPagination
+from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
-from .serializers import UserSerializer
+from .serializers import UserCodeSerializer, UserJWTSerializer, UserSerializer
 
 
 @api_view(['POST'])
@@ -29,10 +30,10 @@ def obtain_confirmation_code(request):
     conf_code = get_confirmation_code()
     pass_data['confirmation_code'] = conf_code
     if user.first():
-        serializer = UserSerializer(user.first(), data=pass_data)
+        serializer = UserCodeSerializer(user.first(), data=pass_data)
         resp_status = status.HTTP_200_OK
     else:
-        serializer = UserSerializer(data=pass_data)
+        serializer = UserCodeSerializer(data=pass_data)
         resp_status = status.HTTP_201_CREATED
 
     if serializer.is_valid():
@@ -54,7 +55,7 @@ def get_jwt_token(request):
         username=request.data.get('username'),
         confirmation_code=request.data.get('confirmation_code'))
     if user.first():
-        serializer = UserSerializer(user.first(), data=request.data)
+        serializer = UserJWTSerializer(user.first(), data=request.data)
         if serializer.is_valid():
             refresh = RefreshToken.for_user(user.first())
             response_data = {'token': str(refresh.access_token)}
@@ -62,6 +63,14 @@ def get_jwt_token(request):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     return Response([{'detail': 'User not found'}],
                     status=status.HTTP_404_NOT_FOUND)
+
+
+# class UserViewSet(viewsets.ModelViewSet):
+#     http_method_names = ['get', 'post', 'patch', 'delete']
+#     queryset = CustomUser.objects.all()
+#     serializer_class = UserSerializer
+#     permission_classes = [IsAuthenticatedOrReadOnly]
+#     pagination_class = LimitOffsetPagination
 
 
 def send_conf_code(email, conf_code):

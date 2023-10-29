@@ -1,10 +1,10 @@
 """Представления моделей приложения yatube_api в api."""
 from rest_framework import viewsets
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny
 
 from api.serializers import (CategorySerializer, GenreSerializer,
                              TitleSerializer)
+from api.permissions import AllowAnyOrAdmin
 from reviews.models import Category, Genre, Title
 
 
@@ -13,7 +13,7 @@ class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAnyOrAdmin]
     pagination_class = LimitOffsetPagination
 
 
@@ -22,7 +22,7 @@ class GenreViewSet(viewsets.ReadOnlyModelViewSet):
 
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAnyOrAdmin]
     pagination_class = LimitOffsetPagination
 
 
@@ -31,5 +31,5 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     serializer_class = TitleSerializer
     queryset = Title.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [AllowAnyOrAdmin]
     pagination_class = LimitOffsetPagination

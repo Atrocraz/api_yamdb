@@ -1,5 +1,5 @@
 """Разрешения для взаимодействия пользователей с эндпойнтами."""
-from rest_framework.permissions import SAFE_METHODS, BasePermission
+from rest_framework.permissions import BasePermission
 
 
 class AllowAnyOrAdmin(BasePermission):

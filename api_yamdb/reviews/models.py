@@ -1,7 +1,6 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.contrib.auth import get_user_model
 from django.db import models
-# from users.models import User
 # from creations.models import Title
 
 
@@ -58,13 +57,11 @@ class Comment(models.Model):
     review = models.ForeignKey(
         Review,
         on_delete=models.CASCADE,
-        related_name="comments",
         verbose_name="Отзыв с комментарием",
     )
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name="author",
         verbose_name="Автор комментария",
     )
     pub_date = models.DateTimeField(
@@ -74,6 +71,7 @@ class Comment(models.Model):
     text = models.TextField("Текст комментария", )
 
     class Meta:
+        default_related_name = 'comments'
         ordering = ("-pub_date",)
         verbose_name_plural = 'Коментарии'
         verbose_name = 'Коментарий'

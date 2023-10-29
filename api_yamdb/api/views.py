@@ -1,8 +1,13 @@
+"""Представления моделей приложения yatube_api в api."""
 from rest_framework import viewsets
 from rest_framework.generics import get_object_or_404
+from rest_framework.pagination import LimitOffsetPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from reviews.models import Review
-from api.serializers import ReviewSerializer, CommentSerializer
+
+from api.permissions import AllowAnyOrAdmin
+from api.serializers import (CategorySerializer, CommentSerializer, GenreSerializer,
+                             ReviewSerializer, TitleSerializer)
+from reviews.models import Category, Genre, Review, Title
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -43,3 +48,29 @@ class CommentViewSet(viewsets.ModelViewSet):
             author=self.request.user,
             review=self.get_review()
         )
+
+class CategoryViewSet(viewsets.ReadOnlyModelViewSet):
+    """Представление модели категории."""
+
+    serializer_class = CategorySerializer
+    queryset = Category.objects.all()
+    permission_classes = [AllowAnyOrAdmin]
+    pagination_class = LimitOffsetPagination
+
+
+class GenreViewSet(viewsets.ReadOnlyModelViewSet):
+    """Представление модели жанра."""
+
+    serializer_class = GenreSerializer
+    queryset = Genre.objects.all()
+    permission_classes = [AllowAnyOrAdmin]
+    pagination_class = LimitOffsetPagination
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    """Представление модели произведения. """
+
+    serializer_class = TitleSerializer
+    queryset = Title.objects.all()
+    permission_classes = [AllowAnyOrAdmin]
+    pagination_class = LimitOffsetPagination

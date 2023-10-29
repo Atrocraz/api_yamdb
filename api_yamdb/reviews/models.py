@@ -79,7 +79,7 @@ class Title(models.Model):
 class TitlesGenres(models.Model):
     """Вспомогательная модель связи жанров и произведений
     многие-ко-многим.
-    под вопросом
+    под вопросом.
     """
 
     title = models.ForeignKey(

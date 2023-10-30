@@ -84,10 +84,7 @@ class UserJWTSerializer(serializers.ModelSerializer):
     username = serializers.RegexField(
         regex='^[\w.@+-]+\Z',
         required=True,
-        max_length=settings.USERNAME_MAX_LEN,
-        validators=[UniqueValidator(
-            queryset=CustomUser.objects.all(),
-            message='This username is already registered!'),])
+        max_length=settings.USERNAME_MAX_LEN)
     confirmation_code = serializers.CharField(
         write_only=True,
         required=True)

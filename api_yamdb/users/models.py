@@ -10,6 +10,10 @@ ROLE_CHOICES = (
 
 
 class CustomUser(AbstractUser):
+    username = models.CharField(
+        'Никнейм пользователя',
+        unique=True,
+        max_length=settings.USERNAME_MAX_LEN)
     confirmation_code = models.CharField(
         'Код подтверждения',
         blank=True,

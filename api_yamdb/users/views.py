@@ -51,26 +51,12 @@ def get_jwt_token(request):
     Ожидает на вход поля username и confirmation_code.
     В качестве ответа на запрос возвращает JWT-токен.
     '''
-    user = CustomUser.objects.filter(
-        username=request.data.get('username'),
-        confirmation_code=request.data.get('confirmation_code'))
-    if user.first():
-        serializer = UserJWTSerializer(user.first(), data=request.data)
-        if serializer.is_valid():
-            refresh = RefreshToken.for_user(user.first())
-            response_data = {'token': str(refresh.access_token)}
-            return Response(response_data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    user = CustomUser.objects.filter(username=request.data.get('username'))
-    if user.first():
-        return Response(status=status.HTTP_400_BAD_REQUEST)
-
-    if 'username' in request.data:
-        return Response([{'detail': 'User not found'}],
-                        status=status.HTTP_404_NOT_FOUND)
-
-    return Response(status=status.HTTP_400_BAD_REQUEST)
+    serializer = UserJWTSerializer(data=request.data)
+    if serializer.is_valid():
+        refresh = RefreshToken.for_user(request.data.get('username'))
+        response_data = {'token': str(refresh.access_token)}
+        return Response(response_data, status=status.HTTP_200_OK)
+    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class UserViewSet(viewsets.ModelViewSet):

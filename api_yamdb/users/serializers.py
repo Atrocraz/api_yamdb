@@ -2,6 +2,7 @@ import math
 import random
 
 from django.conf import settings
+from django.http import Http404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
 
@@ -81,13 +82,8 @@ class UserCodeSerializer(serializers.ModelSerializer):
 class UserJWTSerializer(serializers.ModelSerializer):
     '''Класс-сериализатор для модели CustomUser
     '''
-    username = serializers.RegexField(
-        regex='^[\w.@+-]+\Z',
-        required=True,
-        max_length=settings.USERNAME_MAX_LEN)
-    confirmation_code = serializers.CharField(
-        write_only=True,
-        required=True)
+    username = serializers.CharField()
+    confirmation_code = serializers.CharField()
 
     class Meta:
         model = CustomUser
@@ -96,12 +92,20 @@ class UserJWTSerializer(serializers.ModelSerializer):
                             'is_staff', 'is_active', 'date_joined',
                             'first_name', 'last_name', 'bio', 'role', 'email')
 
-    def validate_username(self, value):
-        'Валидатор поля username.'
+    def validate(self, data):
+        username = data.get('username')
+        confirmation_code = data.get('confirmation_code')
 
-        if value == 'me':
-            raise serializers.ValidationError("This username is forbidden!")
-        return value
+        user = CustomUser.objects.filter(username=username).first()
+
+        if user:
+            if user.confirmation_code == confirmation_code:
+                return data
+
+            raise serializers.ValidationError(
+                {"confirmation_code": "Confirmation code is wrong."})
+
+        raise Http404("User does not exist.")
 
 
 class UserSerializer(serializers.ModelSerializer):

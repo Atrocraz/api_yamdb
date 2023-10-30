@@ -6,12 +6,14 @@ from django.core.mail import send_mail
 from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import AllowAny, IsAuthenticatedOrReadOnly, IsAuthenticated
+from rest_framework.permissions import (AllowAny, IsAuthenticatedOrReadOnly,
+                                        IsAuthenticated)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
 from .serializers import UserCodeSerializer, UserJWTSerializer, UserSerializer
+from .permissions import IsAdmin
 
 
 @api_view(['POST'])
@@ -24,20 +26,18 @@ def obtain_confirmation_code(request):
     Отправляет пользователю код подтверждения на почту и
     Сохраняет его в базу данных для последующей сверки.
     '''
-    pass_data = request.data
-    user = CustomUser.objects.filter(username=pass_data.get('username'),
-                                     email=pass_data.get('email'))
-    conf_code = get_confirmation_code()
-    pass_data['confirmation_code'] = conf_code
+    user = CustomUser.objects.filter(username=request.data.get('username'),
+                                     email=request.data.get('email'))
     if user.first():
-        serializer = UserCodeSerializer(user.first(), data=pass_data)
+        serializer = UserCodeSerializer(user.first(), data=request.data)
         resp_status = status.HTTP_200_OK
     else:
-        serializer = UserCodeSerializer(data=pass_data)
-        resp_status = status.HTTP_201_CREATED
+        serializer = UserCodeSerializer(data=request.data)
+        resp_status = status.HTTP_200_OK
 
     if serializer.is_valid():
-        send_conf_code(pass_data.get('email'), conf_code)
+        send_conf_code(request.data.get('email'),
+                       request.data.get('confirmation_code'))
         serializer.save()
         return Response(serializer.data, status=resp_status)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -61,16 +61,24 @@ def get_jwt_token(request):
             response_data = {'token': str(refresh.access_token)}
             return Response(response_data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    return Response([{'detail': 'User not found'}],
-                    status=status.HTTP_404_NOT_FOUND)
+
+    user = CustomUser.objects.filter(username=request.data.get('username'))
+    if user.first():
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+
+    if 'username' in request.data:
+        return Response([{'detail': 'User not found'}],
+                        status=status.HTTP_404_NOT_FOUND)
+
+    return Response(status=status.HTTP_400_BAD_REQUEST)
 
 
-# class UserViewSet(viewsets.ModelViewSet):
-#     http_method_names = ['get', 'post', 'patch', 'delete']
-#     queryset = CustomUser.objects.all()
-#     serializer_class = UserSerializer
-#     permission_classes = [IsAuthenticatedOrReadOnly]
-#     pagination_class = LimitOffsetPagination
+class UserViewSet(viewsets.ModelViewSet):
+    http_method_names = ['get', 'post', 'patch', 'delete']
+    queryset = CustomUser.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = [IsAuthenticated, IsAdmin]
+    pagination_class = LimitOffsetPagination
 
 
 def send_conf_code(email, conf_code):

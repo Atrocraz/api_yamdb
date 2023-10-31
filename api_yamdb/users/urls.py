@@ -4,6 +4,8 @@ from rest_framework import routers
 import users.views as views
 
 router_v1 = routers.DefaultRouter()
+# router_v1.register(r'^users/(?P<username>[\w.@+-]+)/$',
+#                    views.UserViewSet, basename='users')
 router_v1.register('users', views.UserViewSet, basename='users')
 
 urlpatterns = [

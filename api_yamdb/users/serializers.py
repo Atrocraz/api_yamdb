@@ -8,14 +8,11 @@ from rest_framework.validators import UniqueValidator
 
 from users.models import CustomUser
 
-import logging
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename='main.log',
-    filemode='a',
-    format='%(asctime)s, %(levelname)s, %(message)s, %(name)s'
-)
+ROLE_CHOICES = (
+        ('user', 'user'),
+        ('moderator', 'moderator'),
+        ('admin', 'admin')
+    )
 
 
 class UserCodeSerializer(serializers.ModelSerializer):
@@ -30,7 +27,7 @@ class UserCodeSerializer(serializers.ModelSerializer):
     переменной EMAIL_MAX_LEN.
     '''
     username = serializers.RegexField(
-        regex='^[\w.@+-]+\Z',
+        regex=r'^[\w.@+-]+\Z',
         required=True,
         max_length=settings.USERNAME_MAX_LEN,
         validators=[UniqueValidator(
@@ -120,7 +117,7 @@ class UserSerializer(serializers.ModelSerializer):
     переменной EMAIL_MAX_LEN.
     '''
     username = serializers.RegexField(
-        regex='^[\w.@+-]+\Z',
+        regex=r'^[\w.@+-]+\Z',
         required=True,
         max_length=settings.USERNAME_MAX_LEN,
         validators=[UniqueValidator(
@@ -132,25 +129,26 @@ class UserSerializer(serializers.ModelSerializer):
         validators=[UniqueValidator(
             queryset=CustomUser.objects.all(),
             message='This email is already registered!'),])
-    role = serializers.CharField(
-        max_length=10,
-        default='user')
+    role = serializers.ChoiceField(
+        default='user',
+        choices=ROLE_CHOICES)
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'username', 'first_name',
+        fields = ('username', 'email', 'first_name',
                   'last_name', 'bio', 'role')
         read_only_fields = ('id', 'password', 'last_login', 'is_superuser',
                             'is_staff', 'is_active', 'date_joined',
                             'confirmation_code')
 
-    def to_representation(self, obj):
-        ret = super(UserSerializer, self).to_representation(obj)
+    def validate(self, data):
+        # Запрет на изменение роли, если обрабатывается
+        # эндпоинт users/me/
+        if self.context.get('action', None) == 'patchme':
+            if 'role' in data:
+                data.pop('role')
 
-        return ret
-
-    def __init__(self, *args, **kwargs):
-        super(UserSerializer, self).__init__(*args, **kwargs)
+        return data
 
     def validate_username(self, value):
         'Валидатор поля username.'

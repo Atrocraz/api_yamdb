@@ -3,6 +3,10 @@ from django.contrib.auth.admin import UserAdmin
 from .models import CustomUser
 
 
-UserAdmin.fieldsets += (
+@admin.register(CustomUser)
+class UserAdmin(UserAdmin):
+    fieldsets = UserAdmin.fieldsets+(
+        ('Права доступа API',
+            {'fields': ('role',), },
+         ),
     )
-admin.site.register(CustomUser, UserAdmin)

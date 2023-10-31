@@ -2,7 +2,7 @@ import csv
 from django.core.management.base import BaseCommand
 
 from reviews.models import (Category, Title, Genre, User,
-                            Review, Comment, TitleGenre)
+                            Review, Comment, TitlesGenres)
 
 
 DICT_MODELS_REWIEWS = {
@@ -12,7 +12,7 @@ DICT_MODELS_REWIEWS = {
     Title: 'static/data/titles.csv',
     Review: 'static/data/review.csv',
     Comment: 'static/data/comments.csv',
-    TitleGenre: 'static/data/genre_title.csv',
+    TitlesGenres: 'static/data/genre_title.csv',
 }
 
 

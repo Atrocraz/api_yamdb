@@ -68,7 +68,7 @@ class UserCodeSerializer(serializers.ModelSerializer):
 
     def to_representation(self, obj):
         ret = super(UserCodeSerializer, self).to_representation(obj)
-        # ret.pop('confirmation_code')
+        ret.pop('confirmation_code')
         return ret
 
     def validate_username(self, value):

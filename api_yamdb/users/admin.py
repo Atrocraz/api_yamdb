@@ -5,8 +5,13 @@ from .models import CustomUser
 
 @admin.register(CustomUser)
 class UserAdmin(UserAdmin):
+    "Регистрация кастомных полей модели в админ-панели"
+
     fieldsets = UserAdmin.fieldsets+(
         ('Права доступа API',
             {'fields': ('role',), },
+         ),
+        ('Информация о пользователе',
+            {'fields': ('bio',), },
          ),
     )

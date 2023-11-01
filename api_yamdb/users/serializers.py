@@ -33,7 +33,7 @@ class UserCodeSerializer(serializers.ModelSerializer):
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
                             message='This username is already registered!'),])
-    email = serializers.CharField(
+    email = serializers.EmailField(
         max_length=settings.EMAIL_MAX_LEN,
         required=True,
         validators=[
@@ -118,7 +118,7 @@ class UserSerializer(serializers.ModelSerializer):
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
                             message='This username is already registered!'),])
-    email = serializers.CharField(
+    email = serializers.EmailField(
         max_length=settings.EMAIL_MAX_LEN,
         required=True,
         validators=[

@@ -1,26 +1,14 @@
-from django.conf import settings
 from django.core.mail import send_mail
-from django.shortcuts import get_object_or_404
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
-from rest_framework.permissions import (AllowAny, IsAuthenticated,
-                                        IsAuthenticatedOrReadOnly)
+from rest_framework.permissions import (AllowAny, IsAuthenticated)
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from .models import CustomUser
 from .permissions import IsAdmin
 from .serializers import UserCodeSerializer, UserJWTSerializer, UserSerializer
-
-import logging
-
-logging.basicConfig(
-    level=logging.DEBUG,
-    filename='main.log',
-    filemode='a',
-    format='%(asctime)s, %(levelname)s, %(message)s, %(name)s'
-)
 
 
 @api_view(['POST'])
@@ -43,9 +31,9 @@ def obtain_confirmation_code(request):
         resp_status = status.HTTP_200_OK
 
     if serializer.is_valid():
-        send_conf_code(request.data.get('email'),
-                       request.data.get('confirmation_code'))
         serializer.save()
+        send_conf_code(serializer.data.get('email'),
+                       serializer.data.get('confirmation_code'))
         return Response(serializer.data, status=resp_status)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -68,28 +56,41 @@ def get_jwt_token(request):
 
 
 class UserViewSet(viewsets.ModelViewSet):
+    '''API-viewset класс для обработки запросов по модели пользователя.
+
+    Обрабатывает следующие эндпоинты:
+    /users/
+    /users/{username}/
+    /users/me/
+    '''
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = CustomUser.objects.all()
     serializer_class = UserSerializer
     permission_classes = [IsAuthenticated, IsAdmin]
     pagination_class = LimitOffsetPagination
     filter_backends = (filters.SearchFilter, )
-    search_fields = ('username',)
+    search_fields = ('username', )
     lookup_field = 'username'
 
     def partial_update(self, request, *args, **kwargs):
         kwargs['partial'] = True
         return self.update(request, *args, **kwargs)
 
-    @action(detail=False, methods=['GET', 'PATCH'], url_path='me',
+    @action(detail=False,
+            methods=['GET', 'PATCH'],
+            url_path='me',
             permission_classes=[IsAuthenticated])
     def user_profile(self, request):
         if request.method == 'PATCH':
-            serializer = UserSerializer(request.user, data=request.data, context={'action': 'patchme'}, partial=True)
+            serializer = UserSerializer(request.user,
+                                        data=request.data,
+                                        context={'action': 'patchme'},
+                                        partial=True)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors,
+                            status=status.HTTP_400_BAD_REQUEST)
 
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)

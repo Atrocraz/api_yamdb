@@ -1,11 +1,11 @@
 from django.contrib import admin
 
 from reviews.models import (Category, Comment, Genre,
-                            Review, Title)
+                            Review, Title, GenreTitle)
 
 
-class TitleInline(admin.TabularInline):
-    model = Title.genres.through
+class GenreInline(admin.TabularInline):
+    model = GenreTitle
 
 
 @admin.register(Review)
@@ -48,9 +48,9 @@ class GenreAdmin(admin.ModelAdmin):
     search_fields = ('name',)
     list_filter = ('name',)
     empty_value_display = '-пусто-',
-    inlines = [
-        TitleInline,
-    ]
+    # inlines = [
+    #     TitleInline,
+    # ]
 
 
 @admin.register(Title)

@@ -1,11 +1,18 @@
 from django.contrib.auth import get_user_model
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.core.exceptions import ValidationError
 from rest_framework import serializers
+from rest_framework.serializers import IntegerField
 from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import Category, Comment, Genre, Review, Title
+from reviews.models import (
+    Category, Comment, Genre, Review, Title, CURRENT_YEAR
+)
 
-User = get_user_model()
+from users.models import CustomUser
+
+User = CustomUser
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -44,20 +51,14 @@ class CommentSerializer(serializers.ModelSerializer):
         model = Comment
         fields = '__all__'
 
+
 class CategorySerializer(serializers.ModelSerializer):
     """Сериализатор категории."""
 
-    slug = serializers.SlugField(
-        max_length=50,
-        validators=[UniqueValidator(
-            queryset=Category.objects.all(),
-            message='Отсутствует обязательное поле или оно некорректно'
-        ),]
-    )
-
     class Meta:
         model = Category
-        fields = '__all__'
+        fields = ['name', 'slug']
+        lookup_field = 'slug'
 
 
 class GenreSerializer(serializers.ModelSerializer):
@@ -73,46 +74,63 @@ class GenreSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Genre
-        fields = '__all__'
+        fields = ['name', 'slug']
+        lookup_field = 'slug'
 
 
-class TitleSerializer(serializers.ModelSerializer):
-    """Сериализатор произведения."""
+class TitleReaderSerializer(serializers.ModelSerializer):
+    """Сериализатор произведения - чтение."""
 
-    category = SlugRelatedField(
+    category = CategorySerializer(
         read_only=True,
-        slug_field='slug',
-        help_text='Выберите категорию'
     )
 
-    genres = SlugRelatedField(
+    genres = GenreSerializer(
         many=True,
-        slug_field='slug',
         read_only=True,
-        help_text='Выберите хотя бы один жанр'
     )
 
     class Meta:
         fields = '__all__'
         model = Title
 
-    def validate_genres(self, value):
-        """
-        Проверка жанров из существующего списка.
-        """
-        for genre in value:
-            if genre not in Genre.objects.all():
-                raise ValidationError(
-                    ['Выберите существующий жанр из списка.']
-                )
-        return value
 
-    def validate_category(self, value):
-        """
-        Проверка категории из существующего списка.
-        """
-        if value not in Category.objects.all():
-            raise ValidationError(
-                ['Выберите существующую категорию из списка.']
-            )
-        return value
+class TitleAdminSerializer(serializers.ModelSerializer):
+    """Сериализатор произведения - запись."""
+    year = IntegerField(
+        validators=[MinValueValidator(1500), MaxValueValidator(CURRENT_YEAR)]
+    )
+    genres = SlugRelatedField(
+        slug_field='slug',
+        many=True,
+        queryset=Genre.objects.all()
+    )
+    category = SlugRelatedField(
+        slug_field='slug',
+        queryset=Category.objects.all()
+    )
+
+    class Meta:
+        fields = '__all__'
+        model = Title
+
+    # def validate_genres(self, value):
+    #     """
+    #     Проверка жанров из существующего списка.
+    #     """
+    #     for genre in value:
+    #         if genre not in Genre.objects.all():
+    #             raise ValidationError(
+    #                 ['Выберите существующий жанр из списка.']
+    #             )
+    #         return value
+
+    # def validate_category(self, value):
+    #     """
+    #     Проверка категории из существующего списка.
+    #     """
+    #     if value not in Category.objects.all():
+    #         raise ValidationError(
+    #             ['Выберите существующую категорию из списка.']
+    #         )
+    #     return value

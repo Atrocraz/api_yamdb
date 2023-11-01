@@ -3,11 +3,10 @@ import datetime
 from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-
-# from creations.models import Title
+from users.models import CustomUser
 
 CHARACTER_LIMIT = 30
-User = get_user_model()
+User = CustomUser
 CURRENT_YEAR = datetime.datetime.now().year
 
 
@@ -29,7 +28,7 @@ class Genre(models.Model):
 class Category(models.Model):
     """Модель категории произведения."""
 
-    name = models.CharField('Заголовок', max_length=100)
+    name = models.CharField('Заголовок', max_length=256)
     slug = models.SlugField('Слаг', max_length=50, unique=True)
 
     class Meta:
@@ -55,16 +54,18 @@ class Title(models.Model):
     )
     genres = models.ManyToManyField(
         Genre,
-        through='TitlesGenres',
+        # on_delete=models.SET_NULL,
         verbose_name='жанр',
         blank=True
+
     )
     category = models.ForeignKey(
         Category,
         on_delete=models.SET_NULL,
         verbose_name='категория',
-        null=True,
-        blank=True
+        max_length=256,
+        blank=True,
+        null=True
     )
 
     class Meta:
@@ -77,21 +78,16 @@ class Title(models.Model):
         return self.title[:CHARACTER_LIMIT]
 
 
-class TitlesGenres(models.Model):
-    """Вспомогательная модель связи жанров и произведений
-    многие-ко-многим.
-    под вопросом.
-    """
-
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE
-    )
+class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
-        null=True,
-        on_delete=models.SET_NULL
-
+        verbose_name='жанр',
+        on_delete=models.CASCADE
+    )
+    title = models.ForeignKey(
+        Title,
+        verbose_name='произведениe',
+        on_delete=models.CASCADE
     )
 
 

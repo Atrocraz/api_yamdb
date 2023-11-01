@@ -54,9 +54,10 @@ class Title(models.Model):
     )
     genres = models.ManyToManyField(
         Genre,
-        through='TitlesGenres',
+        # on_delete=models.SET_NULL,
         verbose_name='жанр',
         blank=True
+
     )
     category = models.ForeignKey(
         Category,
@@ -77,21 +78,16 @@ class Title(models.Model):
         return self.title[:CHARACTER_LIMIT]
 
 
-class TitlesGenres(models.Model):
-    """
-    Вспомогательная модель связи жанров и произведений
-    многие-ко-многим.
-    """
-
-    title = models.ForeignKey(
-        Title,
-        on_delete=models.CASCADE
-    )
+class GenreTitle(models.Model):
     genre = models.ForeignKey(
         Genre,
-        null=True,
-        on_delete=models.SET_NULL
-
+        verbose_name='жанр',
+        on_delete=models.CASCADE
+    )
+    title = models.ForeignKey(
+        Title,
+        verbose_name='произведениe',
+        on_delete=models.CASCADE
     )
 
 

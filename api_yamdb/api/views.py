@@ -1,15 +1,12 @@
 """Представления моделей приложения yatube_api в api."""
-from rest_framework import viewsets, mixins, status
+from rest_framework import viewsets
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.mixins import ListModelMixin, DestroyModelMixin, CreateModelMixin
 from rest_framework.pagination import PageNumberPagination
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
 from rest_framework.filters import SearchFilter
-from rest_framework.generics import get_object_or_404
-from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from rest_framework import exceptions
-from http import HTTPStatus
+from rest_framework.generics import get_object_or_404
 
 from api.serializers import (
     CategorySerializer, CommentSerializer, GenreSerializer,
@@ -69,19 +66,22 @@ class CategoryViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, Gener
     http_method_names = ['get', 'post', 'delete']
     serializer_class = CategorySerializer
     queryset = Category.objects.all()
-    permission_classes = [IsAdminOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     filter_backends = [SearchFilter]
     search_fields = ['name',]
     lookup_field = 'slug'
 
 
-class GenreViewSet(CreateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet):
+class GenreViewSet(
+    CreateModelMixin, ListModelMixin, DestroyModelMixin,
+    GenericViewSet
+):
     """Представление модели жанра."""
 
     http_method_names = ['get', 'post', 'delete']
     serializer_class = GenreSerializer
     queryset = Genre.objects.all()
-    permission_classes = [IsAdminOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     filter_backends = [SearchFilter]
     search_fields = ('name',)
     lookup_field = 'slug'
@@ -92,7 +92,7 @@ class TitleViewSet(viewsets.ModelViewSet):
 
     http_method_names = ['get', 'post', 'patch', 'delete']
     queryset = Title.objects.all()
-    permission_classes = [IsAdminOrReadOnly, IsAuthenticatedOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter
     serializer_class = TitleAdminSerializer

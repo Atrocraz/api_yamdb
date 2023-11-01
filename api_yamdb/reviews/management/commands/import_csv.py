@@ -2,7 +2,7 @@ import csv
 from django.core.management.base import BaseCommand
 
 from reviews.models import (Category, Title, Genre, User,
-                            Review, Comment, TitlesGenres)
+                            Review, Comment, GenreTitle)
 
 
 DICT_MODELS_REWIEWS = {
@@ -12,7 +12,7 @@ DICT_MODELS_REWIEWS = {
     Title: 'static/data/titles.csv',
     Review: 'static/data/review.csv',
     Comment: 'static/data/comments.csv',
-    TitlesGenres: 'static/data/genre_title.csv',
+    GenreTitle: 'static/data/genre_title.csv',
 }
 
 
@@ -23,14 +23,12 @@ class Command(BaseCommand):
         for key, value in DICT_MODELS_REWIEWS.items():
             csv_file = value
 
-            # Получаем модель
             try:
                 model = key
             except NameError:
                 self.stdout.write(self.style.ERROR('Модель не найдена'))
                 return
 
-            # Заполняем модель данными из CSV-файла
             with open(csv_file, 'r') as file:
                 reader = csv.DictReader(file)
                 for row in reader:

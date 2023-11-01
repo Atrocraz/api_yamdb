@@ -30,29 +30,26 @@ class UserCodeSerializer(serializers.ModelSerializer):
         regex=r'^[\w.@+-]+\Z',
         required=True,
         max_length=settings.USERNAME_MAX_LEN,
-        validators=[UniqueValidator(
-            queryset=CustomUser.objects.all(),
-            message='This username is already registered!'),])
+        validators=[
+            UniqueValidator(queryset=CustomUser.objects.all(),
+                            message='This username is already registered!'),])
     email = serializers.EmailField(
         max_length=settings.EMAIL_MAX_LEN,
-        allow_blank=False,
         required=True,
-        validators=[UniqueValidator(
-            queryset=CustomUser.objects.all(),
-            message='This email is already registered!'),])
-    role = serializers.HiddenField(
-        default='user')
-    confirmation_code = serializers.SerializerMethodField()
+        validators=[
+            UniqueValidator(queryset=CustomUser.objects.all(),
+                            message='This email is already registered!'),])
+    role = serializers.HiddenField(default='user')
+    confirmation_code = serializers.CharField(required=False)
 
     class Meta:
         model = CustomUser
         fields = ('email', 'username', 'confirmation_code', 'role')
         read_only_fields = ('id', 'password', 'last_login', 'is_superuser',
                             'is_staff', 'is_active', 'date_joined',
-                            'first_name', 'last_name', 'bio', 'role',
-                            'confirmation_code')
+                            'first_name', 'last_name', 'bio', 'role')
 
-    def get_confirmation_code(self, value):
+    def get_confirmation_code(self):
         "Функция генерации кода подтверждения."
         string = ('0123456789abcdefghijklmnopqrstuvwxyz'
                   'ABCDEFGHIJKLMNOPQRSTUVWXYZ')
@@ -62,6 +59,12 @@ class UserCodeSerializer(serializers.ModelSerializer):
             OTP += string[math.floor(random.random() * length)]
 
         return OTP
+
+    def validate(self, data):
+        confirmation_code = self.get_confirmation_code()
+        validated_data = super(UserCodeSerializer, self).validate(data)
+        validated_data['confirmation_code'] = confirmation_code
+        return validated_data
 
     def to_representation(self, obj):
         ret = super(UserCodeSerializer, self).to_representation(obj)
@@ -77,8 +80,8 @@ class UserCodeSerializer(serializers.ModelSerializer):
 
 
 class UserJWTSerializer(serializers.ModelSerializer):
-    '''Класс-сериализатор для модели CustomUser
-    '''
+    "Класс-сериализатор для отправки пользователю JWT-токена"
+
     username = serializers.CharField()
     confirmation_code = serializers.CharField()
 
@@ -106,37 +109,27 @@ class UserJWTSerializer(serializers.ModelSerializer):
 
 
 class UserSerializer(serializers.ModelSerializer):
-    '''Класс-сериализатор для модели CustomUser
+    "Класс-сериализатор для модели CustomUser"
 
-    Поле username проходит валидацию как регулярное выражение,
-    ограничено в длине переменной USERNAME_MAX_LEN и не может
-    быть равно значению 'me'.
-    Поле confirmation_code доступно только для записи и не
-    отправляет пользователю в ответе на запрос.
-    Поле email проверяется на уникальность и ограничено в длине
-    переменной EMAIL_MAX_LEN.
-    '''
     username = serializers.RegexField(
         regex=r'^[\w.@+-]+\Z',
         required=True,
         max_length=settings.USERNAME_MAX_LEN,
-        validators=[UniqueValidator(
-            queryset=CustomUser.objects.all(),
-            message='This username is already registered!'),])
-    email = serializers.CharField(
+        validators=[
+            UniqueValidator(queryset=CustomUser.objects.all(),
+                            message='This username is already registered!'),])
+    email = serializers.EmailField(
         max_length=settings.EMAIL_MAX_LEN,
         required=True,
-        validators=[UniqueValidator(
-            queryset=CustomUser.objects.all(),
-            message='This email is already registered!'),])
-    role = serializers.ChoiceField(
-        default='user',
-        choices=ROLE_CHOICES)
+        validators=[
+            UniqueValidator(queryset=CustomUser.objects.all(),
+                            message='This email is already registered!'),])
+    role = serializers.ChoiceField(default='user', choices=ROLE_CHOICES)
 
     class Meta:
         model = CustomUser
-        fields = ('username', 'email', 'first_name',
-                  'last_name', 'bio', 'role')
+        fields = ('username', 'email', 'first_name', 'last_name', 'bio',
+                  'role')
         read_only_fields = ('id', 'password', 'last_login', 'is_superuser',
                             'is_staff', 'is_active', 'date_joined',
                             'confirmation_code')

@@ -1,8 +1,10 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
-from rest_framework import serializers
+from rest_framework import serializers, validators
+from rest_framework.generics import get_object_or_404
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import IntegerField
 from rest_framework.validators import UniqueValidator
+
 from reviews.models import (CURRENT_YEAR, Category, Comment, Genre, Review,
                             Title)
 
@@ -12,40 +14,40 @@ User = CustomUser
 
 
 class ReviewSerializer(serializers.ModelSerializer):
-    """Сериализатор для модели Review."""
+    """Сериализатор для Отзывов"""
 
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+        read_only=True,
+        slug_field='username',
     )
 
     class Meta:
         model = Review
-        fields = "__all__"
+        exclude = ('title',)
 
-    def validate(self, data):
-        """Запрещает пользователям оставлять повторные отзывы."""
-
-        if not self.context.get('request').method == 'POST':
-            return data
-        author = self.context.get('request').user
-        title_id = self.context.get('view').kwargs.get('title_id')
-        if Review.objects.filter(author=author, title=title_id).exists():
-            raise serializers.ValidationError(
-                'Вы уже оставляли отзыв на это произведение'
-            )
-        return data
+    def validate(self, attrs):
+        request = self.context['request']
+        if request.method == 'POST':
+            title_id = self.context['view'].kwargs['title_id']
+            title = get_object_or_404(Title, pk=title_id)
+            if title.reviews.filter(author=request.user).exists():
+                raise validators.ValidationError(
+                    'Нельзя оставлять отзыв дважды на одно и тоже произвдение'
+                )
+        return attrs
 
 
 class CommentSerializer(serializers.ModelSerializer):
-    """Сериализатор объектов класса Comment."""
+    """Сериализатор для Комментариев"""
 
     author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
+        read_only=True,
+        slug_field='username',
     )
 
     class Meta:
         model = Comment
-        fields = '__all__'
+        exclude = ('review',)
 
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -85,6 +87,8 @@ class TitleReaderSerializer(serializers.ModelSerializer):
         many=True,
         read_only=True,
     )
+
+    rating = serializers.IntegerField(read_only=True)
 
     class Meta:
         fields = '__all__'

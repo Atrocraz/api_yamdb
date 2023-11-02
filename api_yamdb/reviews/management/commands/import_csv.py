@@ -1,9 +1,8 @@
 import csv
+
 from django.core.management.base import BaseCommand
-
-from reviews.models import (Category, Title, Genre, User,
-                            Review, Comment, GenreTitle)
-
+from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
+                            Title, User)
 
 DICT_MODELS_REWIEWS = {
     Category: 'static/data/category.csv',

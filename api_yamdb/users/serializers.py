@@ -5,7 +5,6 @@ from django.conf import settings
 from django.http import Http404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-
 from users.models import CustomUser
 
 ROLE_CHOICES = (

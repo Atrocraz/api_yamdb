@@ -1,14 +1,10 @@
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
-from django.core.exceptions import ValidationError
 from rest_framework import serializers
-from rest_framework.serializers import IntegerField
 from rest_framework.relations import SlugRelatedField
+from rest_framework.serializers import IntegerField
 from rest_framework.validators import UniqueValidator
-
-from reviews.models import (
-    Category, Comment, Genre, Review, Title, CURRENT_YEAR
-)
+from reviews.models import (CURRENT_YEAR, Category, Comment, Genre, Review,
+                            Title)
 
 from users.models import CustomUser
 

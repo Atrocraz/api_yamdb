@@ -4,7 +4,7 @@ from rest_framework.permissions import SAFE_METHODS, BasePermission
 class AtLeastModeratorOrReadOnly(BasePermission):
     '''Пермишен, проверяющий, есть ли у пользователя права модератора или выше.
     '''
-    
+
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS or
                 request.user.is_moderator or

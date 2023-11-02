@@ -31,9 +31,9 @@ def obtain_confirmation_code(request):
         resp_status = status.HTTP_200_OK
 
     if serializer.is_valid():
+        send_conf_code(serializer.validated_data.get('email'),
+                       serializer.validated_data.get('confirmation_code'))
         serializer.save()
-        send_conf_code(serializer.data.get('email'),
-                       serializer.data.get('confirmation_code'))
         return Response(serializer.data, status=resp_status)
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

@@ -83,7 +83,7 @@ class TitleReaderSerializer(serializers.ModelSerializer):
         read_only=True,
     )
 
-    genres = GenreSerializer(
+    genre = GenreSerializer(
         many=True,
         read_only=True,
     )
@@ -100,7 +100,7 @@ class TitleAdminSerializer(serializers.ModelSerializer):
     year = IntegerField(
         validators=[MinValueValidator(1500), MaxValueValidator(CURRENT_YEAR)]
     )
-    genres = SlugRelatedField(
+    genre = SlugRelatedField(
         slug_field='slug',
         many=True,
         queryset=Genre.objects.all()

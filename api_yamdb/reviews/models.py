@@ -1,12 +1,12 @@
 import datetime
 
-from django.contrib.auth import get_user_model
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from users.models import CustomUser
 
-CHARACTER_LIMIT = 30
 User = CustomUser
+
+CHARACTER_LIMIT = 30
 CURRENT_YEAR = datetime.datetime.now().year
 
 
@@ -54,7 +54,6 @@ class Title(models.Model):
     )
     genres = models.ManyToManyField(
         Genre,
-        # on_delete=models.SET_NULL,
         verbose_name='жанр',
         blank=True
 

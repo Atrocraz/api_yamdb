@@ -14,14 +14,15 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleAdminSerializer, TitleReaderSerializer)
 from reviews.models import Category, Genre, Review, Title
-from users.permissions import IsAdminOrReadOnly, IsStaffOrAuthorOrReadOnly
+from users.permissions import IsAdminOrReadOnly, IsAuthor, IsStaffOrReadOnly
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
     """Вьюсет для обьектов модели Review."""
 
     serializer_class = ReviewSerializer
-    permission_classes = [IsStaffOrAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly,
+                          (IsStaffOrReadOnly | IsAuthor)]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
@@ -42,7 +43,8 @@ class CommentViewSet(viewsets.ModelViewSet):
     """Вьюсет для обьектов модели Comment."""
 
     serializer_class = CommentSerializer
-    permission_classes = [IsStaffOrAuthorOrReadOnly]
+    permission_classes = [IsAuthenticatedOrReadOnly,
+                          (IsStaffOrReadOnly | IsAuthor)]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):

@@ -90,7 +90,21 @@ class GenreTitle(models.Model):
     )
 
 
-class Review(models.Model):
+class AbstractPost(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name='%(class)ss',
+        verbose_name='Автор',
+    )
+    text = models.TextField(verbose_name='Текст')
+    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+
+    class Meta:
+        abstract = True
+
+
+class Review(AbstractPost):
     """Модель Отзывов"""
     text = models.TextField(
         "Текст отзыва",
@@ -134,7 +148,7 @@ class Review(models.Model):
         return self.text[:CHARACTER_LIMIT]
 
 
-class Comment(models.Model):
+class Comment(AbstractPost):
     """Модель Комментариев"""
 
     review = models.ForeignKey(

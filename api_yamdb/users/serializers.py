@@ -8,10 +8,10 @@ from rest_framework.validators import UniqueValidator
 from users.models import CustomUser
 
 ROLE_CHOICES = (
-        ('user', 'user'),
-        ('moderator', 'moderator'),
-        ('admin', 'admin')
-    )
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin')
+)
 
 
 class UserCodeSerializer(serializers.ModelSerializer):
@@ -31,13 +31,13 @@ class UserCodeSerializer(serializers.ModelSerializer):
         max_length=settings.USERNAME_MAX_LEN,
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This username is already registered!'),])
+                            message='This username is already registered!'), ])
     email = serializers.EmailField(
         max_length=settings.EMAIL_MAX_LEN,
         required=True,
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This email is already registered!'),])
+                            message='This email is already registered!'), ])
     role = serializers.HiddenField(default='user')
     confirmation_code = serializers.CharField(required=False)
 
@@ -116,13 +116,13 @@ class UserSerializer(serializers.ModelSerializer):
         max_length=settings.USERNAME_MAX_LEN,
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This username is already registered!'),])
+                            message='This username is already registered!'), ])
     email = serializers.EmailField(
         max_length=settings.EMAIL_MAX_LEN,
         required=True,
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This email is already registered!'),])
+                            message='This email is already registered!'), ])
     role = serializers.ChoiceField(default='user', choices=ROLE_CHOICES)
 
     class Meta:

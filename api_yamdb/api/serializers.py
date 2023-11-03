@@ -67,7 +67,7 @@ class GenreSerializer(serializers.ModelSerializer):
         validators=[UniqueValidator(
             queryset=Genre.objects.all(),
             message='Отсутствует обязательное поле или оно некорректно'
-        ),]
+        ), ]
     )
 
     class Meta:

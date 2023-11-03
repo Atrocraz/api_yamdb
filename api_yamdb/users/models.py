@@ -4,10 +4,10 @@ from django.db import models
 from django.utils import timezone
 
 ROLE_CHOICES = (
-        ('user', 'user'),
-        ('moderator', 'moderator'),
-        ('admin', 'admin')
-    )
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin')
+)
 
 
 class CustomUser(AbstractUser):

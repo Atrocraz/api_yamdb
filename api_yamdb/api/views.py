@@ -71,7 +71,7 @@ class CategoryGengeMixin(
     http_method_names = ['get', 'post', 'delete']
     permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     filter_backends = [SearchFilter]
-    search_fields = ['name',]
+    search_fields = ['name', ]
     lookup_field = 'slug'
 
 

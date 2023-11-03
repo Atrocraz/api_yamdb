@@ -5,14 +5,14 @@ class IsStaffOrReadOnly(BasePermission):
     '''Пермишен, проверяющий, есть ли у пользователя права модератора или выше.
     '''
     def has_permission(self, request, view):
-        return (request.method in SAFE_METHODS or
-                request.user.is_moderator or
-                request.user.is_admin)
+        return (request.method in SAFE_METHODS
+                or request.user.is_moderator
+                or request.user.is_admin)
 
     def has_object_permission(self, request, view, obj):
-        return (request.method in SAFE_METHODS or
-                request.user.is_moderator or
-                request.user.is_admin)
+        return (request.method in SAFE_METHODS
+                or request.user.is_moderator
+                or request.user.is_admin)
 
 
 class IsAdminOrReadOnly(BasePermission):
@@ -22,8 +22,8 @@ class IsAdminOrReadOnly(BasePermission):
     '''
 
     def has_permission(self, request, view):
-        return (request.method in SAFE_METHODS or
-                request.user.is_admin)
+        return (request.method in SAFE_METHODS
+                or request.user.is_admin)
 
 
 class IsAdmin(BasePermission):

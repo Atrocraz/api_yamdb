@@ -8,8 +8,7 @@ class AtLeastModeratorOrReadOnly(BasePermission):
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS or
                 request.user.is_moderator or
-                request.user.is_admin or
-                request.user.is_superuser)
+                request.user.is_admin)
 
 
 class IsAdminOrReadOnly(BasePermission):
@@ -20,15 +19,14 @@ class IsAdminOrReadOnly(BasePermission):
 
     def has_permission(self, request, view):
         return (request.method in SAFE_METHODS or
-                request.user.is_admin or
-                request.user.is_superuser)
+                request.user.is_admin)
 
 
 class IsAdmin(BasePermission):
     "Пермишен, проверяющий, есть ли у пользователя права админа или выше."
 
     def has_permission(self, request, view):
-        return (request.user.is_admin or request.user.is_superuser)
+        return request.user.is_admin
 
 
 class IsStaffOrAuthorOrReadOnly(BasePermission):

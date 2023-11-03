@@ -49,7 +49,7 @@ class CustomUser(AbstractUser):
 
     @property
     def is_admin(self):
-        if self.role == 'admin':
+        if self.role == 'admin' or self.is_superuser:
             return True
         return False
 

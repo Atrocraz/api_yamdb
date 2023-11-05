@@ -2,6 +2,8 @@ from django.contrib import admin
 
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 
+admin.site.empty_value_display = "-empty-"
+
 
 class GenreInline(admin.TabularInline):
     model = GenreTitle
@@ -19,7 +21,6 @@ class ReviewAdmin(admin.ModelAdmin):
         'pub_date',
         'title'
     )
-    empty_value_display = "-empty-"
     list_filter = ('author', 'score', 'pub_date')
     search_fields = ('author',)
 
@@ -35,7 +36,6 @@ class CommentAdmin(admin.ModelAdmin):
         'pub_date',
         'review'
     )
-    empty_value_display = "-empty-"
     list_filter = ('author', 'pub_date')
     search_fields = ('author',)
 
@@ -46,7 +46,6 @@ class GenreAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-',
     # inlines = [
     #     TitleInline,
     # ]
@@ -61,7 +60,6 @@ class TitleAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'year', 'category',)
     search_fields = ('name', 'year',)
     list_filter = ('year',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Category)
@@ -73,4 +71,3 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'

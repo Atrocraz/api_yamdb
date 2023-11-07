@@ -3,6 +3,9 @@ from django.contrib import admin
 from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 
 
+admin.site.empty_value_display = '-пусто-'
+
+
 class GenreInline(admin.TabularInline):
     model = GenreTitle
 
@@ -19,7 +22,6 @@ class ReviewAdmin(admin.ModelAdmin):
         'pub_date',
         'title'
     )
-    empty_value_display = "-empty-"
     list_filter = ('author', 'score', 'pub_date')
     search_fields = ('author',)
 
@@ -35,21 +37,20 @@ class CommentAdmin(admin.ModelAdmin):
         'pub_date',
         'review'
     )
-    empty_value_display = "-empty-"
     list_filter = ('author', 'pub_date')
     search_fields = ('author',)
 
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
+    """Жанры отображены в админ-панели.
+    Можно найти по названию. Фильтр по названию.
+    """
+
     model = Genre,
     list_display = ('id', 'name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-',
-    # inlines = [
-    #     TitleInline,
-    # ]
 
 
 @admin.register(Title)
@@ -58,10 +59,11 @@ class TitleAdmin(admin.ModelAdmin):
     Можно найти по названию и году. Фильтр по году.
     """
 
-    list_display = ('id', 'name', 'year', 'category',)
+    inlines = [GenreInline]
+    list_display = ('id', 'name', 'year', 'category', 'display_genres',)
+    list_editable = ('category',)
     search_fields = ('name', 'year',)
     list_filter = ('year',)
-    empty_value_display = '-пусто-'
 
 
 @admin.register(Category)
@@ -73,4 +75,3 @@ class CategoryAdmin(admin.ModelAdmin):
     list_display = ('id', 'name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
-    empty_value_display = '-пусто-'

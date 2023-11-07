@@ -2,14 +2,11 @@
 from django.db.models import Avg
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import viewsets
-from rest_framework.filters import SearchFilter
 from rest_framework.generics import get_object_or_404
-from rest_framework.mixins import (CreateModelMixin, DestroyModelMixin,
-                                   ListModelMixin)
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.viewsets import GenericViewSet
 
 from api.filters import TitleFilter
+from api.mixins import CategoryGengeMixin
 from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleAdminSerializer, TitleReaderSerializer)
@@ -64,17 +61,6 @@ class CommentViewSet(viewsets.ModelViewSet):
         )
 
 
-class CategoryGengeMixin(
-    CreateModelMixin, ListModelMixin, DestroyModelMixin, GenericViewSet
-):
-    """Миксин для представлений жанра и категории."""
-    http_method_names = ['get', 'post', 'delete']
-    permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
-    filter_backends = [SearchFilter]
-    search_fields = ['name',]
-    lookup_field = 'slug'
-
-
 class CategoryViewSet(CategoryGengeMixin):
     """Представление модели категории."""
 
@@ -96,7 +82,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
         'name'
     )
-    # queryset = Title.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter

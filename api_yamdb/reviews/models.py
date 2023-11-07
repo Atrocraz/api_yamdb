@@ -1,50 +1,49 @@
-import datetime
-
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+
 from users.models import CustomUser
+from api_yamdb.settings import CURRENT_YEAR, MAX_NAME_LENGTH
 
 User = CustomUser
 
 CHARACTER_LIMIT = 30
-CURRENT_YEAR = datetime.datetime.now().year
 
 
-class Genre(models.Model):
+class ВaseCategoyGenre(models.Model):
+    """Общая для жанра и катеогрии."""
+
+    name = models.CharField('Заголовок', max_length=MAX_NAME_LENGTH)
+    slug = models.SlugField('Слаг', unique=True)
+
+    class Meta:
+        abstract = True
+        ordering = ('name',)
+
+    def __str__(self):
+        return self.name[:CHARACTER_LIMIT]
+
+
+class Genre(ВaseCategoyGenre):
     """Модель жанра произведения."""
-
-    name = models.CharField('Заголовок', max_length=100)
-    slug = models.SlugField('Слаг', max_length=50, unique=True)
 
     class Meta:
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name[:CHARACTER_LIMIT]
 
 
-class Category(models.Model):
+class Category(ВaseCategoyGenre):
     """Модель категории произведения."""
-
-    name = models.CharField('Заголовок', max_length=256)
-    slug = models.SlugField('Слаг', max_length=50, unique=True)
 
     class Meta:
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
-        ordering = ('name',)
-
-    def __str__(self):
-        return self.name[:CHARACTER_LIMIT]
 
 
 class Title(models.Model):
     """Модель публикации."""
 
-    name = models.CharField('название', max_length=256)
-    year = models.IntegerField(
+    name = models.CharField('название', max_length=MAX_NAME_LENGTH)
+    year = models.PositiveSmallIntegerField(
         verbose_name='год создания',
         validators=[MaxValueValidator(CURRENT_YEAR)]
     )
@@ -73,11 +72,21 @@ class Title(models.Model):
         verbose_name_plural = 'произведения'
         ordering = ('year',)
 
+    def display_genres(self):
+        """
+        Добавляет возможность просмотра жанров
+        произведения в админ панели.
+        """
+        return ', '.join([genre.name for genre in self.genre.all()[:3]])
+    display_genres.short_description = 'genre'
+
     def __str__(self):
-        return self.title[:CHARACTER_LIMIT]
+        return self.name[:CHARACTER_LIMIT]
 
 
 class GenreTitle(models.Model):
+    """Вспомогательная модель, связывает произведения и жанры."""
+
     genre = models.ForeignKey(
         Genre,
         verbose_name='жанр',

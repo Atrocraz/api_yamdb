@@ -1,3 +1,4 @@
+import datetime
 from datetime import timedelta
 from pathlib import Path
 
@@ -116,6 +117,17 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = ((BASE_DIR / 'static/'), )
 
 CONFIRMATION_CODE_LENGHT = 20
+
 EMAIL_SENDER_ADRESS = 'from@example.com'
+
 EMAIL_MAX_LEN = 254
+
 USERNAME_MAX_LEN = 150
+
+THE_EARLIEST_YEAR = -3000
+
+CURRENT_YEAR = datetime.datetime.now().year
+
+MAX_NAME_LENGTH = 256
+
+CHARACTER_LIMIT = 30

@@ -16,3 +16,12 @@ class UserAdmin(UserAdmin):
             {'fields': ('bio',), },
          ),
     )
+    list_display = (
+        'username',
+        'email',
+        'role',
+        'first_name',
+        'last_name',
+        'is_staff',
+        )
+    list_editable = ('role',)

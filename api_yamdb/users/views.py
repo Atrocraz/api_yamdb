@@ -1,4 +1,3 @@
-from django.core.mail import send_mail
 from rest_framework import filters, status, viewsets
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.pagination import LimitOffsetPagination
@@ -9,6 +8,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from .models import CustomUser
 from .permissions import IsAdmin
 from .serializers import UserCodeSerializer, UserJWTSerializer, UserSerializer
+from .utils import send_conf_code
 
 
 @api_view(['POST'])
@@ -25,17 +25,14 @@ def obtain_confirmation_code(request):
                                      email=request.data.get('email'))
     if user.first():
         serializer = UserCodeSerializer(user.first(), data=request.data)
-        resp_status = status.HTTP_200_OK
     else:
         serializer = UserCodeSerializer(data=request.data)
-        resp_status = status.HTTP_200_OK
 
-    if serializer.is_valid():
-        send_conf_code(serializer.validated_data.get('email'),
-                       serializer.validated_data.get('confirmation_code'))
-        serializer.save()
-        return Response(serializer.data, status=resp_status)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    send_conf_code(serializer.validated_data.get('email'),
+                   serializer.validated_data.get('confirmation_code'))
+    serializer.save()
+    return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 @api_view(['POST'])
@@ -47,12 +44,12 @@ def get_jwt_token(request):
     В качестве ответа на запрос возвращает JWT-токен.
     '''
     serializer = UserJWTSerializer(data=request.data)
-    if serializer.is_valid():
-        user = CustomUser.objects.filter(username=request.data.get('username'))
-        refresh = RefreshToken.for_user(user.first())
-        response_data = {'token': str(refresh.access_token)}
-        return Response(response_data, status=status.HTTP_200_OK)
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    serializer.is_valid(raise_exception=True)
+    user = CustomUser.objects.get(
+        username=serializer.validated_data.get('username'))
+    refresh = RefreshToken.for_user(user)
+    response_data = {'token': str(refresh.access_token)}
+    return Response(response_data, status=status.HTTP_200_OK)
 
 
 class UserViewSet(viewsets.ModelViewSet):
@@ -84,25 +81,11 @@ class UserViewSet(viewsets.ModelViewSet):
         if request.method == 'PATCH':
             serializer = UserSerializer(request.user,
                                         data=request.data,
-                                        context={'action': 'patchme'},
                                         partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors,
-                            status=status.HTTP_400_BAD_REQUEST)
+            serializer.is_valid(raise_exception=True)
+            serializer.validated_data['role'] = request.user.role
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
         serializer = self.get_serializer(request.user)
         return Response(serializer.data, status=status.HTTP_200_OK)
-
-
-def send_conf_code(email, conf_code):
-    "Функция-шорткат для отправки письма."
-    send_mail(
-        subject='[YaMDB] Код подтверждения',
-        message=('Добрый день!\n'
-                 f'Ваш код подтверждения - {conf_code}'),
-        from_email='from@example.com',
-        recipient_list=[email],
-        fail_silently=True,
-    )

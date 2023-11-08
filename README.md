@@ -77,7 +77,7 @@ python manage.py import_csv
 ```
 /auth/signup/
 ```
-Поддерживает POST метод.
+Поддерживает POST метод.\
 Пример запроса:
 ```
 {

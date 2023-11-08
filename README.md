@@ -73,11 +73,9 @@ python manage.py import_csv
 
 ### Примеры запросов:
 
-#### Регистрация нового пользователя:
-```
-/auth/signup/
-```
-Поддерживает POST метод.\
+#### 1. Аутентификация:
+##### /auth/signup/
+POST метод - регистрация нового пользователя\
 Пример запроса:
 ```
 {
@@ -92,7 +90,67 @@ python manage.py import_csv
   "username": "string"
 }
 ```
+##### /auth/token/
+POST метод - получение JWT-токена.\
+Пример запроса:
+```
+{
+  "username": "string",
+  "confirmation_code": "string"
+}
+```
+Пример ответа:
+```
+{
+  "token": "string"
+}
+```
 
+#### 2. Работа с пользователями:
+##### /users/:
+Права доступа: Администратор.\
+GET метод - получение списка всех пользователей.\
+POST метод - создание  нового пользователя.\
+Пример ответа на GET запрос:
+```
+{
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [
+    {
+      "username": "string",
+      "email": "user@example.com",
+      "first_name": "string",
+      "last_name": "string",
+      "bio": "string",
+      "role": "user"
+    }
+  ]
+}
+```
+Пример POST запроса:
+```
+{
+  "username": "string",
+  "email": "user@example.com",
+  "first_name": "string",
+  "last_name": "string",
+  "bio": "string",
+  "role": "user"
+}
+```
+Пример ответа на POST запрос:
+```
+{
+"username": "string",
+"email": "user@example.com",
+"first_name": "string",
+"last_name": "string",
+"bio": "string",
+"role": "user"
+}
+```
 ### Технологический стек проекта:
 Проект написан на Python 3.9 с использованием DjangoRestFramework 3.12.4
 Подключена библиотека Simple JWT для работы с JWT-токеном;

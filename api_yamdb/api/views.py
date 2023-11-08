@@ -11,7 +11,7 @@ from api.serializers import (CategorySerializer, CommentSerializer,
                              GenreSerializer, ReviewSerializer,
                              TitleAdminSerializer, TitleReaderSerializer)
 from reviews.models import Category, Genre, Review, Title
-from users.permissions import IsAdminOrReadOnly, IsAuthor, IsStaffOrReadOnly
+from users.permissions import IsAdminOrReadOnly, IsStaffOwnerOrReadOnly
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -19,7 +19,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     serializer_class = ReviewSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,
-                          (IsStaffOrReadOnly | IsAuthor)]
+                          IsStaffOwnerOrReadOnly]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_title(self):
@@ -41,7 +41,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     serializer_class = CommentSerializer
     permission_classes = [IsAuthenticatedOrReadOnly,
-                          (IsStaffOrReadOnly | IsAuthor)]
+                          IsStaffOwnerOrReadOnly]
     http_method_names = ['get', 'post', 'patch', 'delete']
 
     def get_review(self):

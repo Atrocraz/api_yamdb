@@ -8,7 +8,7 @@ from .models import CustomUser
 class UserAdmin(UserAdmin):
     "Регистрация кастомных полей модели в админ-панели"
 
-    fieldsets = UserAdmin.fieldsets+(
+    fieldsets = UserAdmin.fieldsets + (
         ('Права доступа API',
             {'fields': ('role',), },
          ),
@@ -16,3 +16,12 @@ class UserAdmin(UserAdmin):
             {'fields': ('bio',), },
          ),
     )
+    list_display = (
+        'username',
+        'email',
+        'role',
+        'first_name',
+        'last_name',
+        'is_staff',
+        )
+    list_editable = ('role',)

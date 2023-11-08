@@ -1,10 +1,9 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from rest_framework import serializers, validators
-from rest_framework.generics import get_object_or_404
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import IntegerField
-from rest_framework.validators import UniqueValidator
 
+from api_yamdb.settings import THE_EARLIEST_YEAR
 from reviews.models import (CURRENT_YEAR, Category, Comment, Genre, Review,
                             Title)
 
@@ -29,8 +28,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         request = self.context['request']
         if request.method == 'POST':
             title_id = self.context['view'].kwargs['title_id']
-            title = get_object_or_404(Title, pk=title_id)
-            if title.reviews.filter(author=request.user).exists():
+            if Review.objects.filter(author=request.user,
+                                     title=title_id).exists():
                 raise validators.ValidationError(
                     'Нельзя оставлять отзыв дважды на одно и тоже произвдение'
                 )
@@ -62,14 +61,6 @@ class CategorySerializer(serializers.ModelSerializer):
 class GenreSerializer(serializers.ModelSerializer):
     """Сериализатор жанра."""
 
-    slug = serializers.SlugField(
-        max_length=50,
-        validators=[UniqueValidator(
-            queryset=Genre.objects.all(),
-            message='Отсутствует обязательное поле или оно некорректно'
-        ), ]
-    )
-
     class Meta:
         model = Genre
         fields = ['name', 'slug']
@@ -98,7 +89,10 @@ class TitleReaderSerializer(serializers.ModelSerializer):
 class TitleAdminSerializer(serializers.ModelSerializer):
     """Сериализатор произведения - запись."""
     year = IntegerField(
-        validators=[MinValueValidator(1500), MaxValueValidator(CURRENT_YEAR)]
+        validators=[
+            MinValueValidator(THE_EARLIEST_YEAR),
+            MaxValueValidator(CURRENT_YEAR)
+        ]
     )
     genre = SlugRelatedField(
         slug_field='slug',
@@ -114,23 +108,5 @@ class TitleAdminSerializer(serializers.ModelSerializer):
         fields = '__all__'
         model = Title
 
-    # def validate_genres(self, value):
-    #     """
-    #     Проверка жанров из существующего списка.
-    #     """
-    #     for genre in value:
-    #         if genre not in Genre.objects.all():
-    #             raise ValidationError(
-    #                 ['Выберите существующий жанр из списка.']
-    #             )
-    #         return value
-
-    # def validate_category(self, value):
-    #     """
-    #     Проверка категории из существующего списка.
-    #     """
-    #     if value not in Category.objects.all():
-    #         raise ValidationError(
-    #             ['Выберите существующую категорию из списка.']
-    #         )
-    #     return value
+    def to_representation(self, value):
+        return TitleReaderSerializer(value).data

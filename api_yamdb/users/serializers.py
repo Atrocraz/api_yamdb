@@ -2,16 +2,12 @@ import math
 import random
 
 from django.conf import settings
-from django.http import Http404
+from django.shortcuts import get_object_or_404
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator
-from users.models import CustomUser
 
-ROLE_CHOICES = (
-    ('user', 'user'),
-    ('moderator', 'moderator'),
-    ('admin', 'admin')
-)
+from users.models import CustomUser
+from users.validators import check_me_name
 
 
 class UserCodeSerializer(serializers.ModelSerializer):
@@ -31,22 +27,12 @@ class UserCodeSerializer(serializers.ModelSerializer):
         max_length=settings.USERNAME_MAX_LEN,
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This username is already registered!'), ])
-    email = serializers.EmailField(
-        max_length=settings.EMAIL_MAX_LEN,
-        required=True,
-        validators=[
-            UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This email is already registered!'), ])
-    role = serializers.HiddenField(default='user')
-    confirmation_code = serializers.CharField(required=False)
+                            message='This username is already registered!'),
+        ])
 
     class Meta:
         model = CustomUser
-        fields = ('email', 'username', 'confirmation_code', 'role')
-        read_only_fields = ('id', 'password', 'last_login', 'is_superuser',
-                            'is_staff', 'is_active', 'date_joined',
-                            'first_name', 'last_name', 'bio', 'role')
+        fields = ('email', 'username')
 
     def get_confirmation_code(self):
         "Функция генерации кода подтверждения."
@@ -65,20 +51,14 @@ class UserCodeSerializer(serializers.ModelSerializer):
         validated_data['confirmation_code'] = confirmation_code
         return validated_data
 
-    def to_representation(self, obj):
-        ret = super(UserCodeSerializer, self).to_representation(obj)
-        ret.pop('confirmation_code')
-        return ret
-
     def validate_username(self, value):
         'Валидатор поля username.'
 
-        if value == 'me':
-            raise serializers.ValidationError("This username is forbidden!")
+        check_me_name(value)
         return value
 
 
-class UserJWTSerializer(serializers.ModelSerializer):
+class UserJWTSerializer(serializers.Serializer):
     "Класс-сериализатор для отправки пользователю JWT-токена"
 
     username = serializers.CharField()
@@ -87,15 +67,13 @@ class UserJWTSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
         fields = ('username', 'confirmation_code')
-        read_only_fields = ('id', 'password', 'last_login', 'is_superuser',
-                            'is_staff', 'is_active', 'date_joined',
-                            'first_name', 'last_name', 'bio', 'role', 'email')
+        read_only_fields = ('username', 'confirmation_code')
 
     def validate(self, data):
         username = data.get('username')
         confirmation_code = data.get('confirmation_code')
 
-        user = CustomUser.objects.filter(username=username).first()
+        user = get_object_or_404(CustomUser, username=username)
 
         if user:
             if user.confirmation_code == confirmation_code:
@@ -103,8 +81,6 @@ class UserJWTSerializer(serializers.ModelSerializer):
 
             raise serializers.ValidationError(
                 {"confirmation_code": "Confirmation code is wrong."})
-
-        raise Http404("User does not exist.")
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -117,34 +93,14 @@ class UserSerializer(serializers.ModelSerializer):
         validators=[
             UniqueValidator(queryset=CustomUser.objects.all(),
                             message='This username is already registered!'), ])
-    email = serializers.EmailField(
-        max_length=settings.EMAIL_MAX_LEN,
-        required=True,
-        validators=[
-            UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This email is already registered!'), ])
-    role = serializers.ChoiceField(default='user', choices=ROLE_CHOICES)
 
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'first_name', 'last_name', 'bio',
                   'role')
-        read_only_fields = ('id', 'password', 'last_login', 'is_superuser',
-                            'is_staff', 'is_active', 'date_joined',
-                            'confirmation_code')
-
-    def validate(self, data):
-        # Запрет на изменение роли, если обрабатывается
-        # эндпоинт users/me/
-        if self.context.get('action', None) == 'patchme':
-            if 'role' in data:
-                data.pop('role')
-
-        return data
 
     def validate_username(self, value):
         'Валидатор поля username.'
 
-        if value == 'me':
-            raise serializers.ValidationError("This username is forbidden!")
+        check_me_name(value)
         return value

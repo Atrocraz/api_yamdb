@@ -1,17 +1,21 @@
 import csv
 
 from django.core.management.base import BaseCommand
+
+from api_yamdb.settings import STATICFILES_DIRS
 from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
                             Title, User)
 
+
+DATAFILES_DIR = STATICFILES_DIRS
 DICT_MODELS_REWIEWS = {
-    Category: 'static/data/category.csv',
-    Genre: 'static/data/genre.csv',
-    User: 'static/data/users.csv',
-    Title: 'static/data/titles.csv',
-    Review: 'static/data/review.csv',
-    Comment: 'static/data/comments.csv',
-    GenreTitle: 'static/data/genre_title.csv',
+    Category: STATICFILES_DIRS / 'data/category.csv',
+    Genre: STATICFILES_DIRS / 'data/genre.csv',
+    User: STATICFILES_DIRS / 'data/users.csv',
+    Title: STATICFILES_DIRS / 'titles.csv',
+    Review: STATICFILES_DIRS / 'data/review.csv',
+    Comment: STATICFILES_DIRS / 'data/comments.csv',
+    GenreTitle: STATICFILES_DIRS / 'data/genre_title.csv',
 }
 
 
@@ -28,10 +32,9 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.ERROR('Модель не найдена'))
                 return
 
-            with open(csv_file, 'r') as file:
+            with open(csv_file, 'r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
-                for row in reader:
-                    model.objects.create(**row)
+                model.objects.bulk_create(model(**row) for row in reader)
 
             self.stdout.write(self.style.SUCCESS(
                 f'Данные из {csv_file} успешно загружены в базу данных'

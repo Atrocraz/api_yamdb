@@ -75,6 +75,7 @@ python manage.py import_csv
 
 #### 1. Аутентификация:
 ##### /auth/signup/
+Права доступа: Все.\
 POST метод - регистрация нового пользователя\
 Пример запроса:
 ```
@@ -91,6 +92,7 @@ POST метод - регистрация нового пользователя\
 }
 ```
 ##### /auth/token/
+Права доступа: Все.\
 POST метод - получение JWT-токена.\
 Пример запроса:
 ```
@@ -107,10 +109,11 @@ POST метод - получение JWT-токена.\
 ```
 
 #### 2. Работа с пользователями:
-##### /users/:
+##### /users/
 Права доступа: Администратор.\
 GET метод - получение списка всех пользователей.\
-POST метод - создание  нового пользователя.\
+POST метод - создание нового пользователя.\
+
 Пример ответа на GET запрос:
 ```
 {
@@ -143,14 +146,207 @@ POST метод - создание  нового пользователя.\
 Пример ответа на POST запрос:
 ```
 {
-"username": "string",
-"email": "user@example.com",
-"first_name": "string",
-"last_name": "string",
-"bio": "string",
-"role": "user"
+  "username": "string",
+  "email": "user@example.com",
+  "first_name": "string",
+  "last_name": "string",
+  "bio": "string",
+  "role": "user"
 }
 ```
+##### /users/{username}
+Права доступа: Администратор.\
+GET метод - получение информации о пользователе.\
+PATCH метод - изменение профиля пользователя.\
+DEL метод - удаление профиля пользователя.\
+
+Пример PATCH запроса:
+```
+{
+  "username": "string",
+  "email": "user@example.com",
+  "first_name": "string",
+  "last_name": "string",
+  "bio": "string",
+  "role": "user"
+}
+```
+
+Пример ответа на GET и PATCH запросы:
+```
+{
+  "username": "string",
+  "email": "user@example.com",
+  "first_name": "string",
+  "last_name": "string",
+  "bio": "string",
+  "role": "user"
+}
+```
+
+##### /users/me
+Права доступа: Авторизованный пользователь.\
+GET метод - получение информации о своём профиле.\
+PATCH метод - изменение своего профиля.\
+
+Пример PATCH запроса:
+```
+{
+  "username": "string",
+  "email": "user@example.com",
+  "first_name": "string",
+  "last_name": "string",
+  "bio": "string"
+}
+```
+
+Пример ответа на GET и PATCH запросы:
+```
+{
+  "username": "string",
+  "email": "user@example.com",
+  "first_name": "string",
+  "last_name": "string",
+  "bio": "string",
+  "role": "user"
+}
+```
+#### 3. Категории:
+##### /categories/
+GET метод - получение списка всех категорий. Права доступа: Все.\
+POST метод - создание новой категории. Права доступа: Администратор.\
+Пример ответа на GET запрос:
+```
+{
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [
+    {
+      "name": "string",
+      "slug": "string"
+    }
+  ]
+}
+```
+Пример POST запроса:
+```
+{
+  "name": "string",
+  "slug": "string"
+}
+```
+Пример ответа на POST запрос:
+```
+{
+  "name": "string",
+  "slug": "string"
+}
+```
+##### /categories/{slug}/
+DEL метод - удаление категории. Права доступа: Администратор.\
+
+#### 4. Жанры:
+##### /genres/
+GET метод - получение списка всех жанров. Права доступа: Все.\
+POST метод - создание нового жанра. Права доступа: Администратор.\
+
+Пример ответа на GET запрос:
+```
+{
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [
+    {
+      "name": "string",
+      "slug": "string"
+    }
+  ]
+}
+```
+Пример POST запроса:
+```
+{
+  "name": "string",
+  "slug": "string"
+}
+```
+Пример ответа на POST запрос:
+```
+{
+  "name": "string",
+  "slug": "string"
+}
+```
+##### /categories/{slug}/
+DEL метод - удаление жанра. Права доступа: Администратор.\
+
+#### 5. Произведения:
+##### /titles/
+GET метод - получение списка всех произведений. Права доступа: Все.\
+POST метод - создание нового произведения. Права доступа: Администратор.\
+
+Пример ответа на GET запрос:
+```
+{
+  "count": 0,
+  "next": "string",
+  "previous": "string",
+  "results": [
+    {
+      "id": 0,
+      "name": "string",
+      "year": 0,
+      "rating": 0,
+      "description": "string",
+      "genre": [
+        {
+          "name": "string",
+          "slug": "string"
+        }
+      ],
+      "category": {
+        "name": "string",
+        "slug": "string"
+      }
+    }
+  ]
+}
+```
+Пример POST запроса:
+```
+{
+  "name": "string",
+  "year": 0,
+  "description": "string",
+  "genre": [
+    "string"
+  ],
+  "category": "string"
+}
+```
+Пример ответа на POST запрос:
+```
+{
+  "id": 0,
+  "name": "string",
+  "year": 0,
+  "rating": 0,
+  "description": "string",
+  "genre": [
+    {
+      "name": "string",
+      "slug": "string"
+    }
+  ],
+  "category": {
+    "name": "string",
+    "slug": "string"
+  }
+}
+```
+
 ### Технологический стек проекта:
 Проект написан на Python 3.9 с использованием DjangoRestFramework 3.12.4
 Подключена библиотека Simple JWT для работы с JWT-токеном;

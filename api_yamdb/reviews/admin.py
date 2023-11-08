@@ -5,6 +5,9 @@ from reviews.models import Category, Comment, Genre, GenreTitle, Review, Title
 admin.site.empty_value_display = "-empty-"
 
 
+admin.site.empty_value_display = '-пусто-'
+
+
 class GenreInline(admin.TabularInline):
     model = GenreTitle
 
@@ -42,13 +45,14 @@ class CommentAdmin(admin.ModelAdmin):
 
 @admin.register(Genre)
 class GenreAdmin(admin.ModelAdmin):
+    """Жанры отображены в админ-панели.
+    Можно найти по названию. Фильтр по названию.
+    """
+
     model = Genre,
     list_display = ('id', 'name', 'slug',)
     search_fields = ('name',)
     list_filter = ('name',)
-    # inlines = [
-    #     TitleInline,
-    # ]
 
 
 @admin.register(Title)
@@ -57,7 +61,9 @@ class TitleAdmin(admin.ModelAdmin):
     Можно найти по названию и году. Фильтр по году.
     """
 
-    list_display = ('id', 'name', 'year', 'category',)
+    inlines = [GenreInline]
+    list_display = ('id', 'name', 'year', 'category', 'display_genres',)
+    list_editable = ('category',)
     search_fields = ('name', 'year',)
     list_filter = ('year',)
 

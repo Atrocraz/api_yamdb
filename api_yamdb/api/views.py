@@ -96,7 +96,6 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.annotate(rating=Avg('reviews__score')).order_by(
         'name'
     )
-    # queryset = Title.objects.all()
     permission_classes = [IsAuthenticatedOrReadOnly, IsAdminOrReadOnly]
     filter_backends = [DjangoFilterBackend]
     filterset_class = TitleFilter

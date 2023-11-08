@@ -1,6 +1,5 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
 from rest_framework import serializers, validators
-from rest_framework.generics import get_object_or_404
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import IntegerField
 
@@ -29,8 +28,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         request = self.context['request']
         if request.method == 'POST':
             title_id = self.context['view'].kwargs['title_id']
-            title = get_object_or_404(Title, pk=title_id)
-            if title.reviews.filter(author=request.user).exists():
+            if Review.objects.filter(author=request.user,
+                                     title=title_id).exists():
                 raise validators.ValidationError(
                     'Нельзя оставлять отзыв дважды на одно и тоже произвдение'
                 )

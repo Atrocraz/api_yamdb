@@ -1,12 +1,11 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.conf import settings
 from rest_framework import serializers, validators
 from rest_framework.relations import SlugRelatedField
 from rest_framework.serializers import IntegerField
 
-from api_yamdb.settings import THE_EARLIEST_YEAR
-from reviews.models import (CURRENT_YEAR, Category, Comment, Genre, Review,
+from reviews.models import (Category, Comment, Genre, Review,
                             Title)
-
 from users.models import CustomUser
 
 User = CustomUser
@@ -88,10 +87,11 @@ class TitleReaderSerializer(serializers.ModelSerializer):
 
 class TitleAdminSerializer(serializers.ModelSerializer):
     """Сериализатор произведения - запись."""
+
     year = IntegerField(
         validators=[
-            MinValueValidator(THE_EARLIEST_YEAR),
-            MaxValueValidator(CURRENT_YEAR)
+            MinValueValidator(settings.THE_EARLIEST_YEAR),
+            MaxValueValidator(settings.CURRENT_YEAR)
         ]
     )
     genre = SlugRelatedField(

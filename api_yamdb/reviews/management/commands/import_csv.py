@@ -1,21 +1,20 @@
 import csv
 
+from django.conf import settings
 from django.core.management.base import BaseCommand
 
-from api_yamdb.settings import STATICFILES_DIRS
 from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
                             Title, User)
 
 
-DATAFILES_DIR = STATICFILES_DIRS
 DICT_MODELS_REWIEWS = {
-    Category: STATICFILES_DIRS / 'data/category.csv',
-    Genre: STATICFILES_DIRS / 'data/genre.csv',
-    User: STATICFILES_DIRS / 'data/users.csv',
-    Title: STATICFILES_DIRS / 'titles.csv',
-    Review: STATICFILES_DIRS / 'data/review.csv',
-    Comment: STATICFILES_DIRS / 'data/comments.csv',
-    GenreTitle: STATICFILES_DIRS / 'data/genre_title.csv',
+    Category: settings.STATICFILES_DIRS / 'data/category.csv',
+    Genre: settings.STATICFILES_DIRS / 'data/genre.csv',
+    User: settings.STATICFILES_DIRS / 'data/users.csv',
+    Title: settings.STATICFILES_DIRS / 'titles.csv',
+    Review: settings.STATICFILES_DIRS / 'data/review.csv',
+    Comment: settings.STATICFILES_DIRS / 'data/comments.csv',
+    GenreTitle: settings.STATICFILES_DIRS / 'data/genre_title.csv',
 }
 
 

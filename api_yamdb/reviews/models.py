@@ -155,11 +155,6 @@ class Comment(AbstractPost):
         on_delete=models.CASCADE,
         verbose_name="отзыв с комментарием",
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="автор комментария",
-    )
 
     text = models.TextField("текст комментария", )
 

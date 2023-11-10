@@ -4,10 +4,8 @@ import random
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from rest_framework import serializers
-from rest_framework.validators import UniqueValidator
 
 from users.models import CustomUser
-from users.validators import check_me_name
 
 
 class UserCodeSerializer(serializers.ModelSerializer):
@@ -21,14 +19,6 @@ class UserCodeSerializer(serializers.ModelSerializer):
     Поле email проверяется на уникальность и ограничено в длине
     переменной EMAIL_MAX_LEN.
     '''
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+\Z',
-        required=True,
-        max_length=settings.USERNAME_MAX_LEN,
-        validators=[
-            UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This username is already registered!'),
-        ])
 
     class Meta:
         model = CustomUser
@@ -50,12 +40,6 @@ class UserCodeSerializer(serializers.ModelSerializer):
         validated_data = super(UserCodeSerializer, self).validate(data)
         validated_data['confirmation_code'] = confirmation_code
         return validated_data
-
-    def validate_username(self, value):
-        'Валидатор поля username.'
-
-        check_me_name(value)
-        return value
 
 
 class UserJWTSerializer(serializers.Serializer):
@@ -86,21 +70,7 @@ class UserJWTSerializer(serializers.Serializer):
 class UserSerializer(serializers.ModelSerializer):
     "Класс-сериализатор для модели CustomUser"
 
-    username = serializers.RegexField(
-        regex=r'^[\w.@+-]+\Z',
-        required=True,
-        max_length=settings.USERNAME_MAX_LEN,
-        validators=[
-            UniqueValidator(queryset=CustomUser.objects.all(),
-                            message='This username is already registered!'), ])
-
     class Meta:
         model = CustomUser
         fields = ('username', 'email', 'first_name', 'last_name', 'bio',
                   'role')
-
-    def validate_username(self, value):
-        'Валидатор поля username.'
-
-        check_me_name(value)
-        return value

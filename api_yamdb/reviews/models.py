@@ -1,8 +1,10 @@
 from django.core.validators import MaxValueValidator, MinValueValidator
+from django.conf import settings
+from django.contrib import admin
 from django.db import models
 
 from users.models import CustomUser
-from api_yamdb.settings import CHARACTER_LIMIT, CURRENT_YEAR, MAX_NAME_LENGTH
+
 
 User = CustomUser
 
@@ -10,7 +12,7 @@ User = CustomUser
 class ВaseCategoyGenre(models.Model):
     """Общая для жанра и катеогрии."""
 
-    name = models.CharField('Заголовок', max_length=MAX_NAME_LENGTH)
+    name = models.CharField('Заголовок', max_length=settings.MAX_NAME_LENGTH)
     slug = models.SlugField('Слаг', unique=True)
 
     class Meta:
@@ -18,13 +20,13 @@ class ВaseCategoyGenre(models.Model):
         ordering = ('name',)
 
     def __str__(self):
-        return self.name[:CHARACTER_LIMIT]
+        return self.name[:settings.CHARACTER_LIMIT]
 
 
 class Genre(ВaseCategoyGenre):
     """Модель жанра произведения."""
 
-    class Meta:
+    class Meta(ВaseCategoyGenre.Meta):
         verbose_name = 'жанр'
         verbose_name_plural = 'жанры'
 
@@ -32,7 +34,7 @@ class Genre(ВaseCategoyGenre):
 class Category(ВaseCategoyGenre):
     """Модель категории произведения."""
 
-    class Meta:
+    class Meta(ВaseCategoyGenre.Meta):
         verbose_name = 'категория'
         verbose_name_plural = 'категории'
 
@@ -40,10 +42,10 @@ class Category(ВaseCategoyGenre):
 class Title(models.Model):
     """Модель публикации."""
 
-    name = models.CharField('название', max_length=MAX_NAME_LENGTH)
+    name = models.CharField('название', max_length=settings.MAX_NAME_LENGTH)
     year = models.PositiveSmallIntegerField(
         verbose_name='год создания',
-        validators=[MaxValueValidator(CURRENT_YEAR)]
+        validators=[MaxValueValidator(settings.CURRENT_YEAR)]
     )
     description = models.TextField(
         null=True,
@@ -59,7 +61,7 @@ class Title(models.Model):
         Category,
         on_delete=models.SET_NULL,
         verbose_name='категория',
-        max_length=256,
+        max_length=settings.MAX_NAME_LENGTH,
         blank=True,
         null=True
     )
@@ -70,16 +72,16 @@ class Title(models.Model):
         verbose_name_plural = 'произведения'
         ordering = ('year',)
 
+    @admin.display(description='жанры')
     def display_genres(self):
         """
         Добавляет возможность просмотра жанров
         произведения в админ панели.
         """
         return ', '.join([genre.name for genre in self.genre.all()[:3]])
-    display_genres.short_description = 'genre'
 
     def __str__(self):
-        return self.name[:CHARACTER_LIMIT]
+        return self.name[:settings.CHARACTER_LIMIT]
 
 
 class GenreTitle(models.Model):
@@ -101,7 +103,6 @@ class AbstractPost(models.Model):
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='%(class)ss',
         verbose_name='автор',
     )
     text = models.TextField(verbose_name='текст')
@@ -112,7 +113,7 @@ class AbstractPost(models.Model):
         abstract = True
 
     def __str__(self):
-        return self.text[:CHARACTER_LIMIT]
+        return self.text[:settings.CHARACTER_LIMIT]
 
 
 class Review(AbstractPost):
@@ -129,18 +130,13 @@ class Review(AbstractPost):
         ],
         verbose_name="оценка произведения",
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="автор отзыва",
-    )
     title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         verbose_name="произведение с отзывом",
     )
 
-    class Meta:
+    class Meta(AbstractPost.Meta):
         default_related_name = "reviews"
         verbose_name = 'отзыв'
         verbose_name_plural = 'отзывы'
@@ -159,15 +155,10 @@ class Comment(AbstractPost):
         on_delete=models.CASCADE,
         verbose_name="отзыв с комментарием",
     )
-    author = models.ForeignKey(
-        User,
-        on_delete=models.CASCADE,
-        verbose_name="автор комментария",
-    )
 
     text = models.TextField("текст комментария", )
 
-    class Meta:
+    class Meta(AbstractPost.Meta):
         default_related_name = 'comments'
         verbose_name_plural = 'коментарии'
         verbose_name = 'коментарий'
